@@ -20,11 +20,11 @@ jobs:
       - name: Write Gmail env file from secrets
         run: |
           cat > .env.gmail <<EOF
-          GMAIL_SMTP_EMAIL=${{ secrets.GMAIL_SMTP_EMAIL }}
-          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
-          REPLY_TO=${{ secrets.REPLY_TO }}
-          RECIPIENT=${{ secrets.RECIPIENT }}
-          FROM_NAME=${{ secrets.FROM_NAME }}
+          GMAIL_SMTP_EMAIL='${{ secrets.GMAIL_SMTP_EMAIL }}'
+          GMAIL_APP_PASSWORD='${{ secrets.GMAIL_APP_PASSWORD }}'
+          REPLY_TO='${{ secrets.REPLY_TO }}'
+          RECIPIENT='${{ secrets.RECIPIENT }}'
+          FROM_NAME='${{ secrets.FROM_NAME }}'
           EOF
 
       - name: Validate required secrets
