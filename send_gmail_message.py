@@ -47,7 +47,14 @@ def require_env(name: str) -> str:
     value = os.getenv(name)
     if not value:
         raise SystemExit(f"Missing required environment variable: {name}")
-    return value
+    return value.strip()
+
+
+def sanitize_header_value(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    cleaned = value.replace("\r", " ").replace("\n", " ").strip()
+    return cleaned or None
 
 
 def build_message(
@@ -60,11 +67,20 @@ def build_message(
     html_body: Optional[str],
 ) -> EmailMessage:
     msg = EmailMessage()
-    msg["From"] = f"{from_name} <{sender_email}>"
-    msg["To"] = recipient_email
-    msg["Subject"] = subject
-    if reply_to:
-        msg["Reply-To"] = reply_to
+    safe_sender_email = sanitize_header_value(sender_email)
+    safe_recipient_email = sanitize_header_value(recipient_email)
+    safe_subject = sanitize_header_value(subject)
+    safe_from_name = sanitize_header_value(from_name)
+    safe_reply_to = sanitize_header_value(reply_to)
+
+    if not safe_sender_email or not safe_recipient_email or not safe_subject or not safe_from_name:
+        raise SystemExit("Email headers contain missing or invalid values after sanitization.")
+
+    msg["From"] = f"{safe_from_name} <{safe_sender_email}>"
+    msg["To"] = safe_recipient_email
+    msg["Subject"] = safe_subject
+    if safe_reply_to:
+        msg["Reply-To"] = safe_reply_to
     msg.set_content(body)
     if html_body:
         msg.add_alternative(html_body, subtype="html")
