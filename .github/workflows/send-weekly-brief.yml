@@ -1,0 +1,40 @@
+name: Send Weekly Pharma Brief
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 4 * * 1"
+
+jobs:
+  send-brief:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Write Gmail env file from secrets
+        run: |
+          cat > .env.gmail <<EOF
+          GMAIL_SMTP_EMAIL=${{ secrets.GMAIL_SMTP_EMAIL }}
+          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+          REPLY_TO=${{ secrets.REPLY_TO }}
+          RECIPIENT=${{ secrets.RECIPIENT }}
+          FROM_NAME=${{ secrets.FROM_NAME }}
+          EOF
+
+      - name: Validate required secrets
+        run: |
+          test -n "${{ secrets.GMAIL_SMTP_EMAIL }}"
+          test -n "${{ secrets.GMAIL_APP_PASSWORD }}"
+
+      - name: Send latest weekly brief
+        env:
+          RECIPIENT: ${{ secrets.RECIPIENT }}
+          REPLY_TO: ${{ secrets.REPLY_TO }}
+          FROM_NAME: ${{ secrets.FROM_NAME }}
+        run: sh send_latest_brief.sh
