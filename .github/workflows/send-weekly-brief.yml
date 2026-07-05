@@ -29,8 +29,18 @@ jobs:
 
       - name: Validate required secrets
         run: |
-          test -n "${{ secrets.GMAIL_SMTP_EMAIL }}"
-          test -n "${{ secrets.GMAIL_APP_PASSWORD }}"
+          missing=0
+          if [ -z "${{ secrets.GMAIL_SMTP_EMAIL }}" ]; then
+            echo "::error::Missing repository secret GMAIL_SMTP_EMAIL"
+            missing=1
+          fi
+          if [ -z "${{ secrets.GMAIL_APP_PASSWORD }}" ]; then
+            echo "::error::Missing repository secret GMAIL_APP_PASSWORD"
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
 
       - name: Send latest weekly brief
         env:
