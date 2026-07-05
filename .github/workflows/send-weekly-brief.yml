@@ -47,4 +47,12 @@ jobs:
           RECIPIENT: ${{ secrets.RECIPIENT }}
           REPLY_TO: ${{ secrets.REPLY_TO }}
           FROM_NAME: ${{ secrets.FROM_NAME }}
-        run: sh send_latest_brief.sh
+        run: |
+          echo "Repo files matching weekly brief:"
+          ls -1 *_onyx_analytix_weekly_commercial_pharma_brief.* || true
+          echo
+          echo "Dry-run sender:"
+          sh send_latest_brief.sh --dry-run
+          echo
+          echo "Actual send:"
+          sh send_latest_brief.sh
